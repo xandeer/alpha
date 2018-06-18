@@ -1,0 +1,61 @@
+<template lang="pug">
+#app
+  section.main
+    header Alpha
+
+    router-view
+</template>
+
+<script>
+export default {
+  name: 'app',
+}
+</script>
+
+<style lang="stylus">
+body
+  background-color #333
+  color #ce9178
+  font-size 12px
+
+header
+  text-align center
+  font-size 2.4em
+  padding 1em
+  color #007acc
+
+ul
+  margin 0
+  padding 0
+
+li
+  list-style none
+
+input, textarea
+  background-color #1E1E1E
+  color #CE9178
+  letter-spacing 1
+  border-color #404040
+  border-style solid
+
+textarea
+  resize none
+
+button 
+  border none
+  outline none
+  background-color #404040
+  color #bbb
+
+.btn:hover
+  cursor pointer
+
+.main
+  max-width 700px
+  min-width 360px
+  min-height 100vh
+  margin 0 auto
+  padding 0 20px
+  background-color #252525
+
+</style>

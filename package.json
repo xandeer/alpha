@@ -1,0 +1,31 @@
+{
+  "name": "alpha",
+  "version": "1.0.0",
+  "description": "Read notes.",
+  "main": "src/index.pug",
+  "repository": "git@github.com:xandeer/alpha.git",
+  "author": "xandeer <kkxandeer@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "parcel src/index.pug",
+    "build": "parcel build src/index.pug"
+  },
+  "devDependencies": {
+    "@vue/component-compiler-utils": "^2.0.0",
+    "babel-preset-stage-2": "^6.24.1",
+    "parcel-bundler": "^1.9.0",
+    "pug": "^2.0.3",
+    "stylus": "^0.54.5",
+    "vue-template-compiler": "^2.5.16"
+  },
+  "dependencies": {
+    "moment": "^2.22.2",
+    "normalize.css": "^8.0.0",
+    "object-hash": "^1.3.0",
+    "vue": "^2.5.16",
+    "vue-hot-reload-api": "^2.3.0",
+    "vue-router": "^3.0.1",
+    "vuex": "^3.0.1",
+    "zangodb": "^1.0.7"
+  }
+}
