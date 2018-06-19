@@ -7,8 +7,10 @@
   "author": "xandeer <kkxandeer@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "dev": "parcel src/index.pug",
-    "build": "parcel build src/index.pug"
+    "start": "parcel src/index.pug",
+    "dev:start": "parcel src/index.pug",
+    "dev:build": "parcel build src/index.pug",
+    "build": "parcel build --public-url /alpha/ src/index.pug"
   },
   "devDependencies": {
     "@vue/component-compiler-utils": "^2.0.0",
