@@ -52,7 +52,7 @@ button
 
 .main
   max-width 700px
-  min-width 360px
+  min-width 300px
   min-height 100vh
   margin 0 auto
   padding 0 20px
