@@ -2,6 +2,8 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import zango from 'zangodb/dist/zangodb.min'
 import hash from 'object-hash'
+import ObjectID from 'bson-objectid'
+import axios from 'axios'
 
 Vue.use(Vuex)
 
@@ -43,8 +45,13 @@ const defaultFilter = {
     }
   }]
 }
+let isInited = false
+const http = axios.create({
+  baseURL: 'http://xandeer.top/api/alpha',
+  timeout: 1000
+})
 const actions = {
-  init({
+  async init({
     dispatch
   }) {
     const alphaDb = new zango.Db('alpha', {
@@ -52,9 +59,9 @@ const actions = {
     })
     dbCollection = alphaDb.collection('items')
     window.c = dbCollection
-    dispatch('refreshItems')
+    await dispatch('refreshItems')
   },
-  refreshItems({
+  async refreshItems({
     commit
   }, filter = defaultFilter) {
     commit('CLEAR_ITEMS')
@@ -63,6 +70,40 @@ const actions = {
       if (filter.tag) {
         tag = filter.tag
         delete filter.tag
+      }
+      if (!isInited) {
+        const version = localStorage.getItem('version') || 0
+        const remoteVersion = (await http.get('/version')).data
+        console.log(`version: ${version}, remoteVersion: ${remoteVersion}`)
+        if (version < remoteVersion) {
+          const operates = (await http.get(`/operates/${version}`)).data
+          operates.forEach(operate => {
+            let item = operate.Data
+            switch (operate.Type) {
+              case 0:
+                dbCollection.insert(item)
+                break;
+              case 1:
+                const srcHash = hash(item)
+                const newItem = Object.assign({}, item, {
+                  hash: srcHash
+                })
+                dbCollection.update({
+                  _id: item._id
+                }, newItem, e => e && console.error(e))
+                break;
+              case 2:
+                dbCollection.update({
+                  _id: item._id
+                }, {
+                  removed: true
+                }, e => e && console.error(e))
+                break;
+            }
+          })
+          localStorage.setItem('version', remoteVersion)
+        }
+        isInited = true
       }
       dbCollection.find(filter)
         .sort({
@@ -93,13 +134,16 @@ const actions = {
   }, src) {
     const now = new Date()
     const item = Object.assign({
-      _id: `${Math.round(Math.random(47) * 887) + 100}${now.valueOf()}`,
-      created: now.getTime(),
+      _id: ObjectID.generate(),
+      created: now.toISOString(),
+      modified: now.toISOString(),
+      removed: false,
       hash: hash(src)
     }, src)
 
     commit('INSERT_ITEM', item)
     dbCollection.insert(item)
+    http.post('/items', JSON.stringify(item))
   },
   remove({
     commit,
@@ -113,6 +157,7 @@ const actions = {
     }, {
       removed: true
     }, e => e && console.error(e))
+    http.delete(`items/${_id}`)
   },
   update({
     commit,
@@ -125,7 +170,7 @@ const actions = {
     const oldItem = state.items[index]
     if (srcHash !== oldItem.hash) {
       const newItem = Object.assign({
-        modified: new Date().getTime()
+        modified: new Date().toISOString()
       }, oldItem, src, {
         hash: srcHash
       })
@@ -136,6 +181,7 @@ const actions = {
       dbCollection.update({
         _id: oldItem._id
       }, newItem, e => e && console.error(e))
+      http.put('/items', newItem)
     }
   }
 }
