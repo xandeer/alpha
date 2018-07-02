@@ -8,7 +8,7 @@ import axios from 'axios'
 Vue.use(Vuex)
 
 const state = {
-  items: []
+  items: [],
 }
 
 const mutations = {
@@ -45,9 +45,16 @@ const defaultFilter = {
     }
   }]
 }
+
+function verifyMinified() {}
+
+const isProduction =
+  (typeof process !== 'undefined' && process.env.NODE_ENV === 'production') ||
+  verifyMinified.name !== 'verifyMinified'
+
 let isInited = false
 const http = axios.create({
-  baseURL: 'http://xandeer.top/api/alpha',
+  baseURL: isProduction ? 'http://xandeer.top/api/alpha' : 'http://localhost:3000',
   timeout: 1000
 })
 const actions = {
@@ -129,7 +136,7 @@ const actions = {
     }
     f && dispatch('refreshItems', f)
   },
-  add({
+  async add({
     commit
   }, src) {
     const now = new Date()
@@ -143,9 +150,10 @@ const actions = {
 
     commit('INSERT_ITEM', item)
     dbCollection.insert(item)
-    http.post('/items', JSON.stringify(item))
+    const version = (await http.post('/items', JSON.stringify(item))).data.version
+    localStorage.setItem('version', version)
   },
-  remove({
+  async remove({
     commit,
     state
   }, index) {
@@ -157,9 +165,10 @@ const actions = {
     }, {
       removed: true
     }, e => e && console.error(e))
-    http.delete(`items/${_id}`)
+    const version = (await http.delete(`items/${_id}`)).data.version
+    localStorage.setItem('version', version)
   },
-  update({
+  async update({
     commit,
     state
   }, {
@@ -181,9 +190,10 @@ const actions = {
       dbCollection.update({
         _id: oldItem._id
       }, newItem, e => e && console.error(e))
-      http.put('/items', newItem)
+      const version = (await http.put('/items', newItem)).data.version
+      localStorage.setItem('version', version)
     }
-  }
+  },
 }
 
 export default new Vuex.Store({

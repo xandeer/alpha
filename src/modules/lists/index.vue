@@ -51,13 +51,16 @@ export default {
         this.isFiltered = false
       } else {
         this.$router.push('add')
+        lastDate = ''
       }
     },
     edit(index) {
       this.$router.push(`edit/${index}`)
+      lastDate = ''
     },
     remove(index) {
       this.$store.dispatch('remove', index)
+      lastDate = ''
     },
     isNewDate(time) {
       const date = getDate(time)
