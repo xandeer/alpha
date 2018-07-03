@@ -4,6 +4,7 @@ import Router from 'vue-router'
 import Lists from '../modules/lists'
 import Add from '../modules/add'
 import Edit from '../modules/edit'
+import Login from '../modules/login'
 
 Vue.use(Router)
 
@@ -13,11 +14,11 @@ export default new Router({
       name: 'Add',
       component: Add
     },
-    // {
-    //   path: '/login',
-    //   name: 'Login',
-    //   component: Login
-    // },
+    {
+      path: '/login',
+      name: 'Login',
+      component: Login
+    },
     {
       path: '/edit/:index',
       name: 'Edit',

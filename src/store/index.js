@@ -9,6 +9,7 @@ Vue.use(Vuex)
 
 const state = {
   items: [],
+  isSignined: false
 }
 
 const mutations = {
@@ -26,6 +27,14 @@ const mutations = {
     item
   }) {
     state.items.splice(index, 1, item)
+  },
+  UPDATE_TOKEN(state, token) {
+    localStorage.setItem("jwt-token", token)
+    http.defaults.headers.common['Authorization'] = `Bearer ${token}`
+    state.isSignined = true
+  },
+  SIGNOUT(state) {
+    state.isSignined = false
   }
 }
 
@@ -59,6 +68,7 @@ const http = axios.create({
 })
 const actions = {
   async init({
+    commit,
     dispatch
   }) {
     const alphaDb = new zango.Db('alpha', {
@@ -66,6 +76,18 @@ const actions = {
     })
     dbCollection = alphaDb.collection('items')
     window.c = dbCollection
+    http.defaults.headers.common['Authorization'] = `Bearer ${localStorage.getItem('jwt-token')}`
+    try {
+      const token = localStorage.getItem('jwt-token')
+      if (token) {
+        commit('UPDATE_TOKEN', token)
+        const ret = await http.post('/signin', '')
+        console.log(ret)
+      }
+    } catch (error) {
+      commit('SIGNOUT')
+      console.log(error)
+    }
     await dispatch('refreshItems')
   },
   async refreshItems({
@@ -165,7 +187,7 @@ const actions = {
     }, {
       removed: true
     }, e => e && console.error(e))
-    const version = (await http.delete(`items/${_id}`)).data.version
+    const version = (await http.delete(`/items/${item._id}`)).data.version
     localStorage.setItem('version', version)
   },
   async update({
@@ -193,6 +215,12 @@ const actions = {
       const version = (await http.put('/items', newItem)).data.version
       localStorage.setItem('version', version)
     }
+  },
+  async login({commit}, userInfo) {
+    const res = await http.post('/signin', userInfo)
+    const token = res.data
+
+    commit("UPDATE_TOKEN", token)
   },
 }
 

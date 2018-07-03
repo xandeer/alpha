@@ -1,5 +1,6 @@
 import 'normalize.css'
 
+import 'babel-core/register'
 import 'babel-polyfill'
 import Vue from 'vue'
 
