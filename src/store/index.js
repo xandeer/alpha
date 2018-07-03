@@ -32,6 +32,7 @@ const mutations = {
     localStorage.setItem("jwt-token", token)
     http.defaults.headers.common['Authorization'] = `Bearer ${token}`
     state.isSignined = true
+    isInited = false
   },
   SIGNOUT(state) {
     state.isSignined = false
@@ -81,8 +82,7 @@ const actions = {
       const token = localStorage.getItem('jwt-token')
       if (token) {
         commit('UPDATE_TOKEN', token)
-        const ret = await http.post('/signin', '')
-        console.log(ret)
+        await http.post('/signin', '')
       }
     } catch (error) {
       commit('SIGNOUT')
@@ -168,8 +168,8 @@ const actions = {
     const now = new Date()
     const item = Object.assign({
       _id: ObjectID.generate(),
-      created: now.toISOString(),
-      modified: now.toISOString(),
+      created: now.toJSON(),
+      modified: now.toJSON(),
       removed: false,
       hash: hash(src)
     }, src)
@@ -205,7 +205,7 @@ const actions = {
     const oldItem = state.items[index]
     if (srcHash !== oldItem.hash) {
       const newItem = Object.assign({
-        modified: new Date().toISOString()
+        modified: (new Date()).toJSON()
       }, oldItem, src, {
         hash: srcHash
       })
