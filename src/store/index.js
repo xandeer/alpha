@@ -101,38 +101,42 @@ const actions = {
         delete filter.tag
       }
       if (!isInited) {
-        const version = localStorage.getItem('version') || 0
-        const remoteVersion = (await http.get('/version')).data
-        console.log(`version: ${version}, remoteVersion: ${remoteVersion}`)
-        if (version < remoteVersion) {
-          const operates = (await http.get(`/operates/${version}`)).data
-          operates.forEach(operate => {
-            let item = operate.Data
-            switch (operate.Type) {
-              case 0:
-                dbCollection.insert(item)
-                break;
-              case 1:
-                const srcHash = hash(item)
-                const newItem = Object.assign({}, item, {
-                  hash: srcHash
-                })
-                dbCollection.update({
-                  _id: item._id
-                }, newItem, e => e && console.error(e))
-                break;
-              case 2:
-                dbCollection.update({
-                  _id: item._id
-                }, {
-                  removed: true
-                }, e => e && console.error(e))
-                break;
-            }
-          })
-          localStorage.setItem('version', remoteVersion)
+        try {
+          const version = localStorage.getItem('version') || 0
+          const remoteVersion = (await http.get('/version')).data
+          console.log(`version: ${version}, remoteVersion: ${remoteVersion}`)
+          if (version < remoteVersion) {
+            const operates = (await http.get(`/operates/${version}`)).data
+            operates.forEach(operate => {
+              let item = operate.Data
+              switch (operate.Type) {
+                case 0:
+                  dbCollection.insert(item)
+                  break;
+                case 1:
+                  const srcHash = hash(item)
+                  const newItem = Object.assign({}, item, {
+                    hash: srcHash
+                  })
+                  dbCollection.update({
+                    _id: item._id
+                  }, newItem, e => e && console.error(e))
+                  break;
+                case 2:
+                  dbCollection.update({
+                    _id: item._id
+                  }, {
+                    removed: true
+                  }, e => e && console.error(e))
+                  break;
+              }
+            })
+            localStorage.setItem('version', remoteVersion)
+          }
+          isInited = true
+        } catch (e) {
+          console.error(e)
         }
-        isInited = true
       }
       dbCollection.find(filter)
         .sort({
@@ -216,7 +220,9 @@ const actions = {
       localStorage.setItem('version', version)
     }
   },
-  async login({commit}, userInfo) {
+  async login({
+    commit
+  }, userInfo) {
     const res = await http.post('/signin', userInfo)
     const token = res.data
 
