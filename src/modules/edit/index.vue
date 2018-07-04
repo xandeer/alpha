@@ -42,6 +42,11 @@ export default {
     this.author = this.item.author
     this.tags = this.item.tags.slice()
   },
+  mounted () {
+    setTimeout(() => {
+      this.$refs.content.focus()
+    }, 310);
+  },
   methods: {
     addTag() {
       if (this.tag === '') {

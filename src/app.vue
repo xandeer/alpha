@@ -1,7 +1,7 @@
 <template lang="pug">
 #app
   section.main
-    header Alpha
+    header 学而时习之
 
     router-view
 </template>
@@ -13,6 +13,11 @@ export default {
 </script>
 
 <style lang="stylus">
+html,
+body
+  width 100%
+  height 100%
+
 body
   background-color #333
   color #ce9178
@@ -49,6 +54,12 @@ button
 
 .btn:hover
   cursor pointer
+
+#app
+  position relative
+  overflow-y scroll
+  width 100%
+  height 100%
 
 .main
   max-width 700px

@@ -4,22 +4,26 @@ article.lists
     li(v-for='(item, index) in items')
       .lists-date(v-if='isNewDate(item.created)' v-text='getDate(item.created)')
       hr
-      .lists-content(v-html='item.content')
+      .lists-content(v-html='makeHtml(item.content)')
       .lists-info
-        .lists-from(v-if='item.from !== ""' v-text='`--《${item.from}》`' @click='filterFrom(item.from)')
-        .lists-author(v-if='item.author !== ""' v-text='`--${item.author}`' @click='filterAuthor(item.author)')
+        a.lists-from(v-if='item.from !== ""' v-text='`--《${item.from}》`' @click='filterFrom(item.from)')
+        a.lists-author(v-if='item.author !== ""' v-text='`--${item.author}`' @click='filterAuthor(item.author)')
       .lists-tags(v-if='item.tags.length !== 0')
-        span.tag-title(v-for='tag in item.tags' v-text='tag' @click='filterTag(tag)')
+        a.tag-title(v-for='tag in item.tags' v-text='tag' @click='filterTag(tag)')
       .btn-groups(v-if='isSignined')
         button.btn(@click='edit(index)') edit
         button.btn(@click='remove(index)') delete
   
-  .btn-float(v-show='isSignined || isFiltered' v-bind:class='{ "is-filtered": isFiltered }' @click='onFloatClicked') +
+  button.btn-float(v-show='isSignined || isFiltered' v-bind:class='{ "is-filtered": isFiltered }' @click='onFloatClicked') +
 </template>
 
 <script>
 import { mapState } from 'vuex'
 import moment from 'moment'
+import showdown from 'showdown'
+
+const md = new showdown.Converter()
+md.setFlavor('github')
 
 let lastDate = ''
 export default {
@@ -34,16 +38,21 @@ export default {
   },
   methods: {
     filterFrom(from) {
-      this.isFiltered = true
-      this.$store.dispatch('filter', {from})
+      this.filter({from})
     },
     filterAuthor(author) {
-      this.isFiltered = true
-      this.$store.dispatch('filter', {author})
+      this.filter({author})
     },
     filterTag(tag) {
+      this.filter({tag})
+    },
+    filter(obj) {
       this.isFiltered = true
-      this.$store.dispatch('filter', {tag})
+      this.$store.dispatch('filter', obj)
+      this.$nextTick(() => {
+        // for Vimium
+        simulateClick(this.$el)
+      })
     },
     onFloatClicked() {
       if (this.isFiltered) {
@@ -72,6 +81,9 @@ export default {
         lastDate = date
       }
       return date
+    },
+    makeHtml(text) {
+      return md.makeHtml(text)
     }
   }
 }
@@ -86,10 +98,22 @@ function getDate(time) {
     sameElse: 'DD/MM/YYYY'
   })
 }
+
+function simulateClick(target) {
+  const evt = new MouseEvent('click', {
+    view: window,
+    bubbles: true,
+    cancelable: true,
+    // clientX: 1,
+    // clientY: 1
+  })
+  target.dispatchEvent(evt)
+}
 </script>
 
 <style lang="stylus">
 .lists
+
   li
     display flex
     flex-direction column
@@ -159,6 +183,7 @@ function getDate(time) {
     cursor pointer
     user-select none
     color #fff
+    padding 0px
 
     &.is-filtered
       transform rotate(45deg)

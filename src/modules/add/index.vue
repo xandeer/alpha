@@ -28,6 +28,11 @@ export default {
       tags: []
     }
   },
+  mounted () {
+    setTimeout(() => {
+      this.$refs.content.focus()
+    }, 310);
+  },
   methods: {
     addTag() {
       if (this.tag === '') {
