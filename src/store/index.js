@@ -107,28 +107,29 @@ const actions = {
           console.log(`version: ${version}, remoteVersion: ${remoteVersion}`)
           if (version < remoteVersion) {
             const operates = (await http.get(`/operates/${version}`)).data
-            operates.forEach(operate => {
-              let item = operate.Data
-              switch (operate.Type) {
-                case 0:
-                  dbCollection.insert(item)
-                  break;
-                case 1:
-                  const srcHash = hash(item)
-                  const newItem = Object.assign({}, item, {
-                    hash: srcHash
-                  })
-                  dbCollection.update({
-                    _id: item._id
-                  }, newItem, e => e && console.error(e))
-                  break;
-                case 2:
-                  dbCollection.update({
-                    _id: item._id
-                  }, {
-                    removed: true
-                  }, e => e && console.error(e))
-                  break;
+            operates.forEach(async operate => {
+              const item = operate.Data
+              if (operate.Type == 0 || !await dbCollection.findOne({_id: item.id})) {
+                dbCollection.insert(item)
+              } else {
+                switch (operate.Type) {
+                  case 1:
+                    const srcHash = hash(item)
+                    const newItem = Object.assign({}, item, {
+                      hash: srcHash
+                    })
+                    dbCollection.update({
+                      _id: item._id
+                    }, newItem, e => e && console.error(e))
+                    break;
+                  case 2:
+                    dbCollection.update({
+                      _id: item._id
+                    }, {
+                      removed: true
+                    }, e => e && console.error(e))
+                    break;
+                }
               }
             })
             localStorage.setItem('version', remoteVersion)
