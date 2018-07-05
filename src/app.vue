@@ -57,8 +57,6 @@ button
 
 #app
   position relative
-  overflow-y scroll
-  --webkit-overflow-scrolling touch
   width 100%
   height 100%
 
