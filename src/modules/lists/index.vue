@@ -10,11 +10,11 @@ article.lists
         a.lists-author(v-if='item.author !== ""' v-text='`--${item.author}`' @click='filterAuthor(item.author)')
       .lists-tags(v-if='item.tags.length !== 0')
         a.tag-title(v-for='tag in item.tags' v-text='tag' @click='filterTag(tag)')
-      .btn-groups(v-if='isSignined')
+      .btn-groups
         button.btn(@click='edit(index)') edit
         button.btn(@click='remove(index)') delete
   
-  button.btn-float(v-show='isSignined || isFiltered' v-bind:class='{ "is-filtered": isFiltered }' @click='onFloatClicked') +
+  button.btn-float(v-bind:class='{ "is-filtered": isFiltered }' @click='onFloatClicked') +
 </template>
 
 <script>
@@ -34,7 +34,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['items', 'isSignined'])
+    ...mapState(['items'])
   },
   methods: {
     filterFrom(from) {

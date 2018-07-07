@@ -5,7 +5,9 @@ import ObjectID from 'bson-objectid'
 
 import api from './api'
 import db from './local-db'
-import { PullError } from './errors'
+import {
+  PullError
+} from './errors'
 
 Vue.use(Vuex)
 
@@ -42,7 +44,6 @@ const getters = {
   getItemByIndex: state => index => state.items[index]
 }
 
-let dbCollection
 const defaultFilter = {
   $or: [{
     removed: {
@@ -64,7 +65,7 @@ const actions = {
     db.init()
     token && await dispatch('login')
     try {
-      await dispatch('pull')
+      await dispatch('push')
     } catch (error) {
       console.log('Failed to pull operates while init.')
     }
@@ -81,7 +82,7 @@ const actions = {
 
           await operates.forEach(async operate => {
             const item = operate.Data
-            if (operate.Type == 0 || !await db.existed(item._id)) {
+            if (operate.Type == 0 || !await db.itemExisted(item._id)) {
               db.insertItem(item)
             } else {
               switch (operate.Type) {
@@ -103,12 +104,48 @@ const actions = {
           console.log('Failed to pull operates.')
           throw new PullError()
         }
-      } else {
-        console.log('There\'s no latest operates.')
       }
     } catch (error) {
       console.log('Failed to get version while pulling operates.')
       throw new PullError()
+    }
+  },
+  async push({
+    dispatch,
+    state,
+  }) {
+    try {
+      await dispatch('pull')
+      if (state.isSignined) {
+        try {
+          const operates = await db.fetchOperates()
+          operates.forEach(async operate => {
+            const item = await db.getItemById(operate._id)
+            let version
+            try {
+              switch (operate.type) {
+                case 0:
+                  version = await api.insertItem(item)
+                  break
+                case 1:
+                  version = await api.updateItem(item)
+                  break
+                case 2:
+                  version = await api.deleteItemById(operate._id)
+                  break
+              }
+              localStorage.setItem('version', version)
+              await db.removeOperate(operate._id)
+            } catch (error) {
+              console.log('Failed to push item.')
+            }
+          })
+        } catch (e) {
+          console.log('Failed to fetch operates from local database.')
+        }
+      }
+    } catch (e) {
+      console.log('Failed to pull before push.')
     }
   },
   async refreshItems({
@@ -127,7 +164,8 @@ const actions = {
     f && dispatch('refreshItems', f)
   },
   async add({
-    commit
+    commit,
+    dispatch,
   }, src) {
     const now = new Date()
     const item = Object.assign({
@@ -139,23 +177,24 @@ const actions = {
     }, src)
 
     commit('INSERT_ITEM', item)
-    db.insertItem(item)
-    dbCollection.insert(item)
-    const version = await api.insertItem(item)
-    localStorage.setItem('version', version)
+    await db.insertItem(item)
+    await db.insertOperate(item._id, 0)
+    await dispatch('push')
   },
   async remove({
+    dispatch,
     commit,
     state
   }, index) {
     const item = state.items[index]
 
     commit('REMOVE_ITEM', index)
-    db.deleteItem(item._id)
-    const version = await api.deleteItemById(item._id)
-    localStorage.setItem('version', version)
+    await db.deleteItem(item._id)
+    await db.insertOperate(item._id, 2)
+    await dispatch('push')
   },
   async update({
+    dispatch,
     commit,
     state
   }, {
@@ -174,9 +213,9 @@ const actions = {
         index,
         item: newItem
       })
-      db.updateItem(oldItem._id, newItem)
-      const version = await api.updateItem(newItem)
-      localStorage.setItem('version', version)
+      await db.updateItem(oldItem._id, newItem)
+      await db.insertOperate(newItem._id, 1)
+      await dispatch('push')
     }
   },
   async login({
@@ -189,7 +228,6 @@ const actions = {
     } catch (error) {
       console.log(error.message)
       commit('SIGNOUT')
-      localStorage.removeItem('jwt-token')
     }
     return false
   },

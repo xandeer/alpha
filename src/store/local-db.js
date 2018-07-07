@@ -1,15 +1,23 @@
 import zango from 'zangodb/dist/zangodb.min'
-import hash from 'object-hash'
-import ObjectID from 'bson-objectid'
 
+const OPERATE_TYPE = {
+  INSERT: 0,
+  UPDATE: 1,
+  DELETE: 2,
+}
 
 let itemsCollection
+let operatesCollection
 
 function init() {
-  const alphaDb = new zango.Db('alpha', {
-    items: ['_id']
+  const itemDb = new zango.Db('alpha/items', {
+    items: ['_id'],
   })
-  itemsCollection = alphaDb.collection('items')
+  itemsCollection = itemDb.collection('items')
+  const operateDb = new zango.Db('alpha/operates', {
+    operates: ['_id'],
+  })
+  operatesCollection = operateDb.collection('operates')
 }
 
 async function fetchItems(filter) {
@@ -35,35 +43,77 @@ async function fetchItems(filter) {
   return items
 }
 
-function insertItem(item) {
+async function getItemById(id) {
+  const item = await itemsCollection.findOne({
+    _id: id
+  })
+
+  return item
+}
+
+async function insertItem(item) {
   return itemsCollection.insert(item)
 }
 
-function updateItem(id, newItem) {
-  return dbCollection.update({
+async function updateItem(id, newItem) {
+  return itemsCollection.update({
     _id: id
   }, newItem, e => e && console.error(e))
 }
 
-function deleteItem(item) {
+async function deleteItem(id) {
   return itemsCollection.update({
-    _id: item._id
+    _id: id
   }, {
     removed: true
   }, e => e && console.error(e))
 }
 
-async function existed(id) {
+async function itemExisted(id) {
   return !!await itemsCollection.findOne({
     _id: id
   })
 }
 
+async function fetchOperates() {
+  const operates = []
+  await operatesCollection.find({})
+    .sort({
+      _id: 1
+    })
+    .forEach(item => {
+      operates.unshift(item)
+    })
+
+  return operates
+}
+
+async function insertOperate(id, type) {
+  const isExisted = !!await operatesCollection.findOne({
+    _id: id
+  })
+  isExisted && await removeOperate(id)
+  return operatesCollection.insert({
+    _id: id,
+    type,
+  })
+}
+
+async function removeOperate(id) {
+  return operatesCollection.remove({
+    _id: id
+  }, e => e && console.error(e))
+}
+
 export default {
   init,
   fetchItems,
+  getItemById,
   insertItem,
   updateItem,
   deleteItem,
-  existed,
+  itemExisted,
+  fetchOperates,
+  insertOperate,
+  removeOperate,
 }

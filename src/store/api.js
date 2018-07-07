@@ -34,12 +34,12 @@ async function insertItem(item) {
 }
 
 async function updateItem(item) {
-  const res = await http.put('/items', item)
+  const res = await http.put('/items', JSON.stringify(item))
   return res.data.version
 }
 
 async function deleteItemById(id) {
-  const res = await http.delete(`/items/${id}`, item)
+  const res = await http.delete(`/items/${id}`)
   return res.data.version
 }
 
