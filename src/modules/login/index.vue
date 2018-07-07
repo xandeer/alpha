@@ -4,10 +4,10 @@
   .wrap
     .account
       .lable-account account: 
-      input(v-model="account", @keyup.enter="login", autofocus)
+      input(v-model="account" @keyup.enter="login")
     .password
       .lable-password password: 
-      input(type="password", v-model="password", @keyup.enter="login")
+      input(type="password" v-model="password", @keyup.enter="login")
 </template>
 
 <script>
@@ -23,16 +23,12 @@ export default {
   },
   methods: {
     async login() {
-      try {
-        const isLoginOk = await this.$store.dispatch('login', {
-          name: this.account,
-          password: sha1(this.password)
-        })
-        isLoginOk && (await this.$store.dispatch('init'))
-        this.$router.push('/')
-      } catch (e) {
-        console.log(e)
-      }
+      const isLoginOk = await this.$store.dispatch('login', {
+        name: this.account,
+        password: sha1(this.password)
+      })
+      isLoginOk && (await this.$store.dispatch('init'))
+      this.$router.push('/')
     }
   }
 }

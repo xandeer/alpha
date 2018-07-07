@@ -1,9 +1,11 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import zango from 'zangodb/dist/zangodb.min'
 import hash from 'object-hash'
 import ObjectID from 'bson-objectid'
-import axios from 'axios'
+
+import api from './api'
+import db from './local-db'
+import { PullError } from './errors'
 
 Vue.use(Vuex)
 
@@ -13,8 +15,8 @@ const state = {
 }
 
 const mutations = {
-  CLEAR_ITEMS(state) {
-    state.items.splice(0, state.items.length)
+  REFRESH_ITEMS(state, items) {
+    state.items.splice(0, state.items.length, ...items)
   },
   INSERT_ITEM(state, item) {
     state.items.unshift(item)
@@ -28,11 +30,8 @@ const mutations = {
   }) {
     state.items.splice(index, 1, item)
   },
-  UPDATE_TOKEN(state, token) {
-    localStorage.setItem("jwt-token", token)
-    http.defaults.headers.common['Authorization'] = `Bearer ${token}`
+  SIGNIN(state) {
     state.isSignined = true
-    isInited = false
   },
   SIGNOUT(state) {
     state.isSignined = false
@@ -56,103 +55,67 @@ const defaultFilter = {
   }]
 }
 
-function verifyMinified() {}
-
-const isProduction =
-  (typeof process !== 'undefined' && process.env.NODE_ENV === 'production') ||
-  verifyMinified.name !== 'verifyMinified'
-
-let isInited = false
-const http = axios.create({
-  baseURL: isProduction ? 'http://xandeer.top/api/alpha' : 'http://localhost:3000',
-  timeout: 1000
-})
 const actions = {
   async init({
-    commit,
     dispatch
   }) {
-    const alphaDb = new zango.Db('alpha', {
-      items: ['_id']
-    })
-    dbCollection = alphaDb.collection('items')
-    window.c = dbCollection
-    http.defaults.headers.common['Authorization'] = `Bearer ${localStorage.getItem('jwt-token')}`
+    const token = localStorage.getItem('jwt-token')
+    api.init(token)
+    db.init()
+    token && await dispatch('login')
     try {
-      const token = localStorage.getItem('jwt-token')
-      if (token) {
-        commit('UPDATE_TOKEN', token)
-        await http.post('/signin', '')
-      }
+      await dispatch('pull')
     } catch (error) {
-      commit('SIGNOUT')
-      console.log(error)
+      console.log('Failed to pull operates while init.')
     }
     await dispatch('refreshItems')
+  },
+  async pull() {
+    const localVersion = localStorage.getItem('version') || 0
+    try {
+      const remoteVersion = await api.getVersion()
+      console.log(`localVersion: ${localVersion}, remoteVersion: ${remoteVersion}`)
+      if (localVersion < remoteVersion) {
+        try {
+          const operates = await api.pullOperates(localVersion)
+
+          await operates.forEach(async operate => {
+            const item = operate.Data
+            if (operate.Type == 0 || !await db.existed(item._id)) {
+              db.insertItem(item)
+            } else {
+              switch (operate.Type) {
+                case 1:
+                  const srcHash = hash(item)
+                  const newItem = Object.assign({}, item, {
+                    hash: srcHash
+                  })
+                  db.updateItem(item._id, newItem)
+                  break;
+                case 2:
+                  db.deleteItem(item._id)
+                  break;
+              }
+            }
+          })
+          localStorage.setItem('version', remoteVersion)
+        } catch (error) {
+          console.log('Failed to pull operates.')
+          throw new PullError()
+        }
+      } else {
+        console.log('There\'s no latest operates.')
+      }
+    } catch (error) {
+      console.log('Failed to get version while pulling operates.')
+      throw new PullError()
+    }
   },
   async refreshItems({
     commit
   }, filter = defaultFilter) {
-    commit('CLEAR_ITEMS')
-    try {
-      let tag
-      if (filter.tag) {
-        tag = filter.tag
-        delete filter.tag
-      }
-      if (!isInited) {
-        try {
-          const version = localStorage.getItem('version') || 0
-          const remoteVersion = (await http.get('/version')).data
-          console.log(`version: ${version}, remoteVersion: ${remoteVersion}`)
-          if (version < remoteVersion) {
-            const operates = (await http.get(`/operates/${version}`)).data
-            operates.forEach(async operate => {
-              const item = operate.Data
-              if (operate.Type == 0 || !await dbCollection.findOne({_id: item.id})) {
-                dbCollection.insert(item)
-              } else {
-                switch (operate.Type) {
-                  case 1:
-                    const srcHash = hash(item)
-                    const newItem = Object.assign({}, item, {
-                      hash: srcHash
-                    })
-                    dbCollection.update({
-                      _id: item._id
-                    }, newItem, e => e && console.error(e))
-                    break;
-                  case 2:
-                    dbCollection.update({
-                      _id: item._id
-                    }, {
-                      removed: true
-                    }, e => e && console.error(e))
-                    break;
-                }
-              }
-            })
-            localStorage.setItem('version', remoteVersion)
-          }
-          isInited = true
-        } catch (e) {
-          console.error(e)
-        }
-      }
-      dbCollection.find(filter)
-        .sort({
-          created: 1
-        })
-        .forEach(item => {
-          if (tag) {
-            item.tags.includes(tag) && commit('INSERT_ITEM', item)
-          } else {
-            commit('INSERT_ITEM', item)
-          }
-        })
-    } catch (error) {
-      console.error(error)
-    }
+    const items = await db.fetchItems(filter)
+    commit('REFRESH_ITEMS', items)
   },
   filter({
     dispatch
@@ -176,8 +139,9 @@ const actions = {
     }, src)
 
     commit('INSERT_ITEM', item)
+    db.insertItem(item)
     dbCollection.insert(item)
-    const version = (await http.post('/items', JSON.stringify(item))).data.version
+    const version = await api.insertItem(item)
     localStorage.setItem('version', version)
   },
   async remove({
@@ -187,12 +151,8 @@ const actions = {
     const item = state.items[index]
 
     commit('REMOVE_ITEM', index)
-    dbCollection.update({
-      _id: item._id
-    }, {
-      removed: true
-    }, e => e && console.error(e))
-    const version = (await http.delete(`/items/${item._id}`)).data.version
+    db.deleteItem(item._id)
+    const version = await api.deleteItemById(item._id)
     localStorage.setItem('version', version)
   },
   async update({
@@ -214,20 +174,24 @@ const actions = {
         index,
         item: newItem
       })
-      dbCollection.update({
-        _id: oldItem._id
-      }, newItem, e => e && console.error(e))
-      const version = (await http.put('/items', newItem)).data.version
+      db.updateItem(oldItem._id, newItem)
+      const version = await api.updateItem(newItem)
       localStorage.setItem('version', version)
     }
   },
   async login({
     commit
-  }, userInfo) {
-    const res = await http.post('/signin', userInfo)
-    const token = res.data
-
-    commit("UPDATE_TOKEN", token)
+  }, userInfo = '') {
+    try {
+      await api.login(userInfo)
+      commit('SIGNIN')
+      return true
+    } catch (error) {
+      console.log(error.message)
+      commit('SIGNOUT')
+      localStorage.removeItem('jwt-token')
+    }
+    return false
   },
 }
 
