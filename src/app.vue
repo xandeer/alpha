@@ -43,6 +43,16 @@ input, textarea
   border-color #404040
   border-style solid
 
+a,
+a:visited
+  background transparent
+  color #007add
+  text-decoration none
+
+strong
+  font-weight bold
+  color #BA80B6
+
 textarea
   resize none
 

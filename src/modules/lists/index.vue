@@ -2,7 +2,7 @@
 article.lists
   ul
     li(v-for='(item, index) in items')
-      .lists-date(v-if='isNewDate(item.created)' v-text='getDate(item.created)')
+      .lists-date(v-if='isNewDate(item.created)' :id='getHashTag(item.created)' v-text='getDate(item.created)')
       hr
       .lists-content(v-html='makeHtml(item.content)')
       .lists-info
@@ -22,7 +22,7 @@ import { mapState } from 'vuex'
 import moment from 'moment'
 import showdown from 'showdown'
 
-const md = new showdown.Converter()
+const md = new showdown.Converter({openLinksInNewWindow: true})
 md.setFlavor('github')
 
 let lastDate = ''
@@ -82,6 +82,9 @@ export default {
       }
       return date
     },
+    getHashTag(time) {
+      return getHashTag(time)
+    },
     makeHtml(text) {
       return md.makeHtml(text)
     }
@@ -96,6 +99,16 @@ function getDate(time) {
     lastDay: '[Yesterday]',
     lastWeek: 'DD/MM/YYYY',
     sameElse: 'DD/MM/YYYY'
+  })
+}
+
+function getHashTag(time) {
+  return moment(time).calendar(null, {
+    sameDay: '[today]',
+    nextDay: '[tomorrow]',
+    lastDay: '[yesterday]',
+    lastWeek: 'YYYY-MM-DD',
+    sameElse: 'YYYY-MM-DD',
   })
 }
 
@@ -127,6 +140,7 @@ function simulateClick(target) {
     line-height 2
     color #666
     font-size 1.6em
+    margin-top 1.5em
   
   &-content
     line-height 1.5
@@ -139,7 +153,7 @@ function simulateClick(target) {
   &-from,
   &-author
     padding 6px 10px
-    max-width 100px
+    max-width 120px
     cursor pointer
     text-overflow ellipsis
     overflow hidden

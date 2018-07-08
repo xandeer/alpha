@@ -58,6 +58,7 @@ export default {
         return
       }
       this.addTag()
+      this.content.includes('**') && this.tags.push('#####')
       const item = {
         content: this.content,
         from: this.from,
