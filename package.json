@@ -10,7 +10,7 @@
     "start": "parcel src/index.pug",
     "dev:start": "parcel src/index.pug",
     "dev:build": "parcel build src/index.pug",
-    "build": "parcel build --public-url /alpha/ src/index.pug"
+    "build": "parcel build --no-cache --no-source-maps --public-url /alpha/ src/index.pug"
   },
   "devDependencies": {
     "@vue/component-compiler-utils": "^2.0.0",
