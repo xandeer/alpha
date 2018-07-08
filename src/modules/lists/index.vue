@@ -138,7 +138,7 @@ function simulateClick(target) {
 
   &-date
     line-height 2
-    color #666
+    color #29c
     font-size 1.6em
     margin-top 1.5em
   

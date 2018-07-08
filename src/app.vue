@@ -43,11 +43,13 @@ input, textarea
   border-color #404040
   border-style solid
 
-a,
-a:visited
+a
   background transparent
   color #007add
-  text-decoration none
+
+  &:visited
+    background transparent
+    color #8839dc
 
 strong
   font-weight bold
