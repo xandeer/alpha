@@ -6,8 +6,8 @@ article.lists
       hr
       .lists-content(v-html='makeHtml(item.content)')
       .lists-info
-        a.lists-from(v-if='item.from !== ""' v-text='`--《${item.from}》`' @click='filterFrom(item.from)')
-        a.lists-author(v-if='item.author !== ""' v-text='`--${item.author}`' @click='filterAuthor(item.author)')
+        .lists-from(v-if='item.from !== ""' v-html='makeHtml(item.from)')
+        .lists-author(v-if='item.author !== ""' v-html='makeHtml(item.author, "--")')
       .lists-tags(v-if='item.tags.length !== 0')
         a.tag-title(v-for='tag in item.tags' v-text='tag' @click='filterTag(tag)')
       .btn-groups
@@ -85,8 +85,8 @@ export default {
     getHashTag(time) {
       return getHashTag(time)
     },
-    makeHtml(text) {
-      return md.makeHtml(text)
+    makeHtml(text, prefix = '') {
+      return md.makeHtml(`${prefix}${text}`)
     }
   }
 }
@@ -104,9 +104,9 @@ function getDate(time) {
 
 function getHashTag(time) {
   return moment(time).calendar(null, {
-    sameDay: '[today]',
-    nextDay: '[tomorrow]',
-    lastDay: '[yesterday]',
+    sameDay: 'YYYY-MM-DD',
+    nextDay: 'YYYY-MM-DD',
+    lastDay: 'YYYY-MM-DD',
     lastWeek: 'YYYY-MM-DD',
     sameElse: 'YYYY-MM-DD',
   })
@@ -153,8 +153,7 @@ function simulateClick(target) {
   &-from,
   &-author
     padding 6px 10px
-    max-width 120px
-    cursor pointer
+    max-width 160px
     text-overflow ellipsis
     overflow hidden
     color #74BCFC
@@ -167,7 +166,8 @@ function simulateClick(target) {
       display inline-block
       max-width 100px
       padding .1em 0em
-      padding-right .5em
+      padding-right .8em
+      margin-right 1em
       cursor pointer
       text-overflow ellipsis
       overflow hidden
