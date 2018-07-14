@@ -19,7 +19,6 @@ body
   height 100%
 
 body
-  background-color #333
   color #ce9178
   font-size 12px
 
@@ -47,10 +46,6 @@ a
   background transparent
   color #007add
 
-  &:visited
-    background transparent
-    color #8839dc
-
 strong
   font-weight bold
   color #BA80B6
@@ -68,6 +63,8 @@ button
   cursor pointer
 
 #app
+  background-color #333
+  overflow-y scroll
   position relative
   width 100%
   height 100%
