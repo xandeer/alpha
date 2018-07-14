@@ -1,7 +1,28 @@
 # alpha
 
+To record daily reading.
 
-## Todo:
+## Optional
+
+If you want to sync your data with mutiple devices, you need a back end.
+You could make it by yourself, or you can look at [alpha-api](https://github.com/xandeer/alpha-api).
+
+## Run and Build
+
+```bash
+# install dependencies
+yarn
+
+# run a local server
+yarn run start
+
+# build to dist folder
+yarn run dev:build
+```
+
+For more info, you can look `package.json`'s scripts.
+
+## Todo
 
 - [ ] features
   - [x] CRUD
@@ -20,4 +41,5 @@
   - [ ] Markdown elements
   - [ ] Href
 - [ ] others
+  - [ ] CI
   - [ ] Sync peer to peer, without server?

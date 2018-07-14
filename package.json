@@ -1,7 +1,7 @@
 {
   "name": "alpha",
   "version": "1.0.0",
-  "description": "Read notes.",
+  "description": "Reading notes.",
   "main": "src/index.pug",
   "repository": "git@github.com:xandeer/alpha.git",
   "author": "xandeer <kkxandeer@gmail.com>",
