@@ -65,6 +65,8 @@ button
 #app
   background-color #333
   overflow-y scroll
+  // for ios momentum scrolling
+  -webkit-overflow-scrolling touch
   position relative
   width 100%
   height 100%
