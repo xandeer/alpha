@@ -1,14 +1,10 @@
 import axios from 'axios'
 
-function verifyMinified() {}
-
-const isProduction =
-  (typeof process !== 'undefined' && process.env.NODE_ENV === 'production') ||
-  verifyMinified.name !== 'verifyMinified'
+import config from '../config'
 
 const http = axios.create({
-  baseURL: isProduction ? 'http://xandeer.top/api/alpha' : 'http://localhost:3000',
-  timeout: 1000
+  baseURL: config.urlPrefix,
+  timeout: config.timeout
 })
 
 function init(token) {

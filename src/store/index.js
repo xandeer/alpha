@@ -3,7 +3,7 @@ import Vuex from 'vuex'
 import hash from 'object-hash'
 import ObjectID from 'bson-objectid'
 
-import api from './api'
+import remote from './remote'
 import db from './local-db'
 import {
   PullError
@@ -61,7 +61,7 @@ const actions = {
     dispatch
   }) {
     const token = localStorage.getItem('jwt-token')
-    api.init(token)
+    remote.init(token)
     db.init()
     token && await dispatch('login')
     try {
@@ -74,11 +74,11 @@ const actions = {
   async pull() {
     const localVersion = localStorage.getItem('version') || 0
     try {
-      const remoteVersion = await api.getVersion()
+      const remoteVersion = await remote.getVersion()
       console.log(`localVersion: ${localVersion}, remoteVersion: ${remoteVersion}`)
       if (localVersion < remoteVersion) {
         try {
-          const operates = await api.pullOperates(localVersion)
+          const operates = await remote.pullOperates(localVersion)
 
           await operates.forEach(async operate => {
             const item = operate.Data
@@ -125,13 +125,13 @@ const actions = {
             try {
               switch (operate.type) {
                 case 0:
-                  version = await api.insertItem(item)
+                  version = await remote.insertItem(item)
                   break
                 case 1:
-                  version = await api.updateItem(item)
+                  version = await remote.updateItem(item)
                   break
                 case 2:
-                  version = await api.deleteItemById(operate._id)
+                  version = await remote.deleteItemById(operate._id)
                   break
               }
               localStorage.setItem('version', version)
@@ -222,7 +222,7 @@ const actions = {
     commit
   }, userInfo = '') {
     try {
-      await api.login(userInfo)
+      await remote.login(userInfo)
       commit('SIGNIN')
       return true
     } catch (error) {
