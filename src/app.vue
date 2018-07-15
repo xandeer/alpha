@@ -21,6 +21,7 @@ body
 body
   color #ce9178
   font-size 12px
+  background-color #333
 
 header
   text-align center
@@ -64,12 +65,8 @@ button
 
 #app
   background-color #333
-  overflow-y scroll
-  // for ios momentum scrolling
-  -webkit-overflow-scrolling touch
   position relative
   width 100%
-  height 100%
 
 .main
   max-width 700px

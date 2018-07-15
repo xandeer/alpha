@@ -14,7 +14,7 @@ article.lists
         button.btn(@click='edit(index)') edit
         button.btn(@click='remove(index)') delete
   
-  button.btn-float(v-bind:class='{ "is-filtered": isFiltered }' @click='onFloatClicked') +
+  fab.lists-fab(@onOpen='onFabOpen' @onClose='onFabClose' ref='fab' :class='{"is-signined": isSignined}')
 </template>
 
 <script>
@@ -22,19 +22,19 @@ import { mapState } from 'vuex'
 import moment from 'moment'
 import showdown from 'showdown'
 
+import Fab from '../../ui/fab'
+
 const md = new showdown.Converter({openLinksInNewWindow: true})
 md.setFlavor('github')
 
 let lastDate = ''
 export default {
   name: 'lists',
-  data () {
-    return {
-      isFiltered: false
-    }
+  components: {
+    Fab
   },
   computed: {
-    ...mapState(['items'])
+    ...mapState(['items', 'isSignined'])
   },
   methods: {
     filterFrom(from) {
@@ -47,21 +47,19 @@ export default {
       this.filter({tag})
     },
     filter(obj) {
-      this.isFiltered = true
       this.$store.dispatch('filter', obj)
       this.$nextTick(() => {
         // for Vimium
         simulateClick(this.$el)
       })
+      this.$refs.fab.open()
     },
-    onFloatClicked() {
-      if (this.isFiltered) {
-        this.$store.dispatch('refreshItems')
-        this.isFiltered = false
-      } else {
-        this.$router.push('add')
-        lastDate = ''
-      }
+    onFabOpen() {
+      this.$router.push('add')
+      lastDate = ''
+    },
+    onFabClose() {
+      this.$store.dispatch('refreshItems')
     },
     edit(index) {
       this.$router.push(`edit/${index}`)
@@ -88,7 +86,7 @@ export default {
     makeHtml(text, prefix = '') {
       return md.makeHtml(`${prefix}${text}`)
     }
-  }
+  },
 }
 
 function getDate(time) {
@@ -182,24 +180,9 @@ function simulateClick(target) {
       margin-right 1em
       border-radius 4px
   
-  .btn-float
-    width 36px
-    height 36px
-    border-radius 50%
-    position fixed
-    bottom 48px
-    right 48px
-    background-color #007acc
-    text-align center
-    line-height 36px
-    text-decoration none
-    font-size 1.5em
-    cursor pointer
-    user-select none
-    color #fff
-    padding 0px
+  &-fab
+    border 2px solid #d33
 
-    &.is-filtered
-      transform rotate(45deg)
-
+    &.is-signined
+      border none
 </style>
