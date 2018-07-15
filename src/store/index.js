@@ -13,7 +13,12 @@ Vue.use(Vuex)
 
 const state = {
   items: [],
-  isSignined: false
+  isSignined: false,
+  lastAddMeta: {
+    author: '',
+    from: '',
+    tags: []
+  }
 }
 
 const mutations = {
@@ -22,6 +27,9 @@ const mutations = {
   },
   INSERT_ITEM(state, item) {
     state.items.unshift(item)
+    state.lastAddMeta.author = item.author
+    state.lastAddMeta.from = item.from
+    state.lastAddMeta.tags = item.tags.slice()
   },
   REMOVE_ITEM(state, index) {
     state.items.splice(index, 1)

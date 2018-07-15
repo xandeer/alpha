@@ -17,6 +17,8 @@ article.add(@keyup.enter.ctrl='save')
 </template>
 
 <script>
+import { mapState } from 'vuex'
+
 export default {
   name: 'add',
   data () {
@@ -28,10 +30,18 @@ export default {
       tags: []
     }
   },
+  computed: {
+    ...mapState(['lastAddMeta'])
+  },
+  created () {
+    this.from = this.lastAddMeta.from
+    this.author = this.lastAddMeta.author
+    this.tags = this.lastAddMeta.tags
+  },
   mounted () {
     setTimeout(() => {
       this.$refs.content.focus()
-    }, 310);
+    }, 310)
   },
   methods: {
     addTag() {
