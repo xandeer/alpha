@@ -12,7 +12,7 @@ export default {
   },
   computed: {
     eventName() {
-      return this.isOpened ? 'onClose' : 'onOpen'
+      return this.isOpened ? 'close' : 'open'
     }
   },
   methods: {

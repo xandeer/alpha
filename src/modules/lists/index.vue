@@ -14,7 +14,7 @@ article.lists
         button.btn(@click='edit(index)') edit
         button.btn(@click='remove(index)') delete
   
-  fab.lists-fab(@onOpen='onFabOpen' @onClose='onFabClose' ref='fab' :class='{"is-signined": isSignined}')
+  fab.lists-fab(@open='onFabOpen' @close='onFabClose' ref='fab' :class='{"is-signined": isSignined}')
 </template>
 
 <script>
