@@ -36,6 +36,8 @@ export default {
   created () {
     this.from = this.lastAddMeta.from
     this.author = this.lastAddMeta.author
+    const i = this.lastAddMeta.tags.indexOf('#####')
+    i !== -1 && this.lastAddMeta.tags.splice(i, 1)
     this.tags = this.lastAddMeta.tags
   },
   mounted () {
@@ -44,12 +46,12 @@ export default {
     }, 310)
   },
   methods: {
-    addTag() {
-      if (this.tag === '') {
+    addTag(tag = this.tag) {
+      if (tag === '') {
         return
       }
-      if (!this.tags.includes(this.tag)) {
-        this.tags.push(this.tag)
+      if (!this.tags.includes(tag)) {
+        this.tags.push(tag)
       }
       this.tag = ''
     },
@@ -68,7 +70,7 @@ export default {
         return
       }
       this.addTag()
-      this.content.includes('**') && this.tags.push('#####')
+      this.content.includes('**') && this.addTag('#####')
       const item = {
         content: this.content,
         from: this.from,
