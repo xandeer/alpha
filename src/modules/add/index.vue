@@ -46,7 +46,10 @@ export default {
     }, 310)
   },
   methods: {
-    addTag(tag = this.tag) {
+    addTag(e, tag = this.tag) {
+      if ((typeof e) === 'string') {
+        tag = e
+      }
       if (tag === '') {
         return
       }
