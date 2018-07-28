@@ -23,6 +23,9 @@ body
   font-size 12px
   background-color #333
 
+  &.modal-open
+    overflow hidden
+
 header
   text-align center
   font-size 2.4em

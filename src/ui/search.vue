@@ -2,8 +2,9 @@
 .search-wrap(:class='{ "is-active": isActive }')
   .search
     .search-input
+    .recent
+    h2 Shortcuts
     .shortcuts
-      h2 Shortcuts
       item(v-for='item in shortcuts' type='tag' :title='item')
     .tags
     .authors
@@ -26,9 +27,12 @@ export default {
   methods: {
     show() {
       this.isActive = true
+      document.body.classList.add('modal-open')
+
     },
     hide() {
       this.isActive = false
+      document.body.classList.remove('modal-open')
     }
   }
 }
@@ -43,15 +47,25 @@ export default {
   width 100%
   height 100%
   background-color rgba(0, 0, 0, .5)
+  overflow scroll
+  justify-content center
 
   &.is-active
-    display block
+    display flex
 
 .search
+  width 100%
   max-width 700px
   min-width 300px
   min-height 100vh
-  margin 0 auto
   padding 0 20px
   background-color #252525
+
+  .recent
+  .shortcuts,
+  .tags,
+  .authors,
+  .froms
+    display flex
+    flex-direction column
 </style>

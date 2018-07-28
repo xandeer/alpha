@@ -14,3 +14,10 @@ export default {
   }
 }
 </script>
+
+<style lang="stylus">
+.search-item
+  text-align start
+  margin 4px 0
+  padding 4px 8px
+</style>
