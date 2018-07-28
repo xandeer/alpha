@@ -2,6 +2,8 @@
 article.lists
   items(:items='items')
   fab.lists-fab(@open='onFabOpen' @close='onFabClose' ref='fab' :class='{"is-signined": isSignined}')
+  button.lists-filter-btn(@click='showFilter')
+  search(ref='search')
 </template>
 
 <script>
@@ -9,17 +11,22 @@ import { mapState } from 'vuex'
 
 import Fab from '../../ui/fab'
 import Items from '../../ui/items'
+import Search from '../../ui/search'
 
 export default {
   name: 'lists',
   components: {
     Fab,
+    Search,
     Items
   },
   computed: {
     ...mapState(['items', 'isSignined']),
   },
   methods: {
+    showFilter() {
+      this.$refs.search.show()
+    },
     onFabOpen() {
       this.$router.push('add')
     },
@@ -66,4 +73,14 @@ function simulateClick(target) {
 
     &.is-signined
       border none
+
+  &-filter-btn
+    position fixed
+    top 48px
+    right 48px
+    width 28px
+    height 28px
+    background-color rgba(22, 22, 22, .8)
+    border-radius 50%
+    border 2px solid rgba(180, 180, 180, .3)
 </style>
