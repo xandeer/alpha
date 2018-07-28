@@ -9,25 +9,30 @@ import Login from '../modules/login'
 Vue.use(Router)
 
 export default new Router({
+  mode: 'history',
   routes: [{
       path: '/add',
-      name: 'Add',
+      name: 'add',
       component: Add
     },
     {
       path: '/login',
-      name: 'Login',
+      name: 'login',
       component: Login
     },
     {
       path: '/edit/:index',
-      name: 'Edit',
+      name: 'edit',
       component: Edit
     },
     {
+      path: '/items',
+      name: 'items',
+      component: Lists,
+    },
+    {
       path: '*',
-      name: 'Lists',
-      component: Lists
+      redirect: '/items'
     }
   ]
 })
