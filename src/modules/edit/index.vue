@@ -17,6 +17,8 @@ article.edit(@keyup.enter.ctrl='save')
 </template>
 
 <script>
+import utils from '../../utils'
+
 export default {
   name: 'edit',
   computed: {
@@ -77,7 +79,7 @@ export default {
       this.addTag()
       this.content.includes('**') && this.addTag('#####')
       const item = {
-        content: this.content,
+        content: utils.replaceQuotations(this.content),
         from: this.from,
         author: this.author,
         tags: this.tags

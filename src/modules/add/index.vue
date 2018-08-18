@@ -19,6 +19,8 @@ article.add(@keyup.enter.ctrl='save')
 <script>
 import { mapState } from 'vuex'
 
+import utils from '../../utils'
+
 export default {
   name: 'add',
   data () {
@@ -75,7 +77,7 @@ export default {
       this.addTag()
       this.content.includes('**') && this.addTag('#####')
       const item = {
-        content: this.content,
+        content: utils.replaceQuotations(this.content),
         from: this.from,
         author: this.author,
         tags: this.tags
