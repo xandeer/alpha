@@ -5,10 +5,10 @@ const isProduction =
   verifyMinified.name !== 'verifyMinified'
 
 function replaceQuotations(src) {
-  return src.replace('“', '「')
-    .replace('”', '」')
-    .replace('‘', '『')
-    .replace('’', '』')
+  return src.replace(/“/g, '「')
+    .replace(/”/g, '」')
+    .replace(/‘/g, '『')
+    .replace(/’/g, '』')
 }
 
 export default {
