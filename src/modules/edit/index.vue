@@ -80,7 +80,7 @@ export default {
       this.content.includes('**') && this.addTag('#####')
       const item = {
         content: utils.replaceQuotations(this.content),
-        from: this.from,
+        from: utils.replaceQuotations(this.from),
         author: this.author,
         tags: this.tags
       }
