@@ -3,10 +3,10 @@ article.add(@keyup.enter.ctrl='save')
   h2 Add
 
   section.input
-    textarea.input-content(autofocus v-model.trim='content' ref='content')
-    input.input-from(placeholder='From' v-model.trim='from' @keyup.enter='focusNext')
-    input.input-author(placeholder='Author' v-model.trim='author' @keyup.enter='focusNext')
-    input.input-tag(placeholder='Add tag' v-model.trim='tag' @keyup.enter='addTag' ref='tagInput')
+    textarea.input-content(autofocus v-model.trim='content' ref='content' @focus='onFocus')
+    input.input-from(placeholder='From' v-model.trim='from' @keyup.enter='focusNext' @focus='onFocus')
+    input.input-author(placeholder='Author' v-model.trim='author' @keyup.enter='focusNext' @focus='onFocus')
+    input.input-tag(placeholder='Add tag' v-model.trim='tag' @keyup.enter='addTag' ref='tagInput' @focus='onFocus')
     .input-tags
       li(v-for='(item, index) in tags')
         span.tag-title {{ item }}
@@ -86,6 +86,9 @@ export default {
       window.history.length > 1
         ? this.$router.go(-1)
         : this.$router.push('/')
+    },
+    onFocus(e) {
+      e.target.setSelectionRange(0, 9999)
     }
   }
 }
