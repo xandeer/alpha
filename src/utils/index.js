@@ -11,7 +11,17 @@ function replaceQuotations(src) {
     .replace(/’/g, '』')
 }
 
+function removeOutmostQuotation(src) {
+  if (!src.startsWith('“') || !src.endsWith('”')) {
+    return src
+  } else {
+    const s = src.slice(1, src.length - 1)
+    return s.indexOf('”') < s.indexOf('“') ? src : s
+  }
+}
+
 export default {
   isProduction,
-  replaceQuotations
+  replaceQuotations,
+  removeOutmostQuotation
 }
