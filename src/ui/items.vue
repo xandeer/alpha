@@ -7,10 +7,10 @@ article.items
       .item
         .item-content(v-html='makeHtml(item.content)')
         .item-info
-          .item-from(v-if='item.from !== ""' v-html='makeHtml(item.from)')
-          .item-author(v-if='item.author !== ""' v-html='makeHtml(item.author, "--")')
+          a.item-from(v-if='item.from !== ""' v-html='makeHtml(item.from)' @click='filter("from", item.from)')
+          a.item-author(v-if='item.author !== ""' v-html='makeHtml(item.author, "--")' @click='filter("author", item.author)')
         .item-tags(v-if='item.tags.length !== 0')
-          a.tag-title(v-for='tag in item.tags' v-text='tag' @click='filterTag(tag)')
+          a.tag-title(v-for='tag in item.tags' v-text='tag' @click='filter("tag", tag)')
         .item-btns
           button.btn(@click='edit(index)') edit
           button.btn(@click='remove(index)') delete
@@ -28,8 +28,8 @@ export default {
   name: 'items',
   props: ['items'],
   methods: {
-    filterTag(tag) {
-      this.$router.push({ name: 'items', query: { type: 'tag', value: encodeURIComponent(tag)} })
+    filter(type, value) {
+      this.$router.push({ name: 'items', query: { type, value: encodeURIComponent(value)} })
     },
     edit(index) {
       this.$router.push(`edit/${index}`)
@@ -128,7 +128,6 @@ function getHashTag(time) {
           padding .1em 0em
           padding-right .8em
           margin-right 1em
-          cursor pointer
           text-overflow ellipsis
           overflow hidden
           color #007ACC

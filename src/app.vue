@@ -46,6 +46,7 @@ input, textarea
 a
   background transparent
   color #007add
+  cursor pointer
 
 strong
   font-weight bold
