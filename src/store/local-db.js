@@ -135,7 +135,7 @@ async function startsWithMedatada(prefix, type) {
   await metadataCollection.find({
     type
   }).forEach(({value}) => {
-    value !== prefix && value.startsWith(prefix) && ret.unshift(value)
+    value !== prefix && value.includes(prefix) && ret.unshift(value)
   })
 
   return ret
