@@ -4,9 +4,21 @@ article.edit(@keyup.enter.ctrl='save')
 
   section.input
     textarea.input-content(autofocus v-model.trim='content' ref='content' @focus='onFocus')
-    input.input-from(placeholder='From' v-model.trim='from' @keyup.enter='focusNext' @focus='onFocus')
-    input.input-author(placeholder='Author' v-model.trim='author' @keyup.enter='focusNext' @focus='onFocus')
-    input.input-tag(placeholder='Add tag' v-model.trim='tag' @keyup.enter='addTag' ref='tagInput' @focus='onFocus')
+    ac-input(type='from'
+      placeholder='From'
+      @enterup='focusNext("author")'
+      v-model.trim='from')
+    ac-input(type='author'
+      ref='author'
+      @enterup='focusNext("tag")'
+      placeholder='Author'
+      v-model.trim='author')
+    ac-input.input-tag(type='tag'
+      ref='tag'
+      placeholder='Add tag'
+      @enterup='addTag'
+      :clearAfterEnter='true'
+      v-model.trim='tag')
     .input-tags
       li(v-for='(item, index) in tags')
         span.tag-title {{ item }}
@@ -18,9 +30,13 @@ article.edit(@keyup.enter.ctrl='save')
 
 <script>
 import utils from '../../utils'
+import AcInput from '../../ui/ac-input'
 
 export default {
   name: 'edit',
+  components: {
+    AcInput
+  },
   computed: {
     index() {
       return this.$route.params.index
@@ -64,11 +80,10 @@ export default {
     },
     removeTag(index) {
       this.tags.splice(index, 1)
-      this.$refs.tagInput.focus()
+      this.$refs.tag.focus()
     },
-    focusNext(event) {
-      const $target = event.target
-      $target.nextElementSibling.focus()
+    focusNext(refKey) {
+      this.$refs[refKey].focus()
     },
     save() {
       if (this.content === '') {

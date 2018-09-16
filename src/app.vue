@@ -72,9 +72,26 @@ button
 .main
   max-width 700px
   min-width 300px
-  min-height 100vh
+  min-height 100%
   margin 0 auto
   padding 0 20px
   background-color #252525
+
+.el-autocomplete-suggestion__wrap
+  background-color #131313
+  border-color #555
+
+.el-autocomplete-suggestion li.highlighted, .el-autocomplete-suggestion li:hover
+  background-color #232323
+
+.el-popper[x-placement^=top] .popper__arrow::after,
+.el-popper[x-placement^=bottom] .popper__arrow::after
+  border-top-color #131313
+  border-bottom-color #131313
+
+.main .el-input__inner
+  background-color #1e1e1e
+  border-color #404040
+  color #CE9178
 
 </style>

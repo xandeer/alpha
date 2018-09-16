@@ -8,6 +8,7 @@ const OPERATE_TYPE = {
 
 let itemsCollection
 let operatesCollection
+let metadataCollection
 
 function init() {
   const itemDb = new zango.Db('alpha/items', {
@@ -18,6 +19,12 @@ function init() {
     operates: ['_id'],
   })
   operatesCollection = operateDb.collection('operates')
+
+  const metadataDb = new zango.Db('alpha/metadata', {
+    metadata: ['_id'],
+  })
+  metadataCollection = metadataDb.collection('metadata')
+  window.mc = metadataCollection
 }
 
 async function fetchItems(filter) {
@@ -52,10 +59,12 @@ async function getItemById(id) {
 }
 
 async function insertItem(item) {
+  await updateMetadata(item)
   return itemsCollection.insert(item)
 }
 
 async function updateItem(id, newItem) {
+  await updateMetadata(newItem)
   return itemsCollection.update({
     _id: id
   }, newItem, e => e && console.error(e))
@@ -105,6 +114,33 @@ async function removeOperate(id) {
   }, e => e && console.error(e))
 }
 
+async function updateMetadata({author, from, tags}) {
+  !!author && await insertMetadata(author, 'author')
+  !!from && await insertMetadata(from, 'from')
+  tags && tags.forEach(async it => await insertMetadata(it, 'tag')) 
+}
+
+async function insertMetadata(value, type) {
+  try {
+    await metadataCollection.insert({
+      _id: `${type}:${value}`,
+      value,
+      type
+    })
+  } catch (e) {}
+}
+
+async function startsWithMedatada(prefix, type) {
+  const ret = []
+  await metadataCollection.find({
+    type
+  }).forEach(({value}) => {
+    value !== prefix && value.startsWith(prefix) && ret.unshift(value)
+  })
+
+  return ret
+}
+
 export default {
   init,
   fetchItems,
@@ -116,4 +152,5 @@ export default {
   fetchOperates,
   insertOperate,
   removeOperate,
+  startsWithMedatada,
 }

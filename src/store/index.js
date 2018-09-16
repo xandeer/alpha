@@ -239,6 +239,9 @@ const actions = {
     }
     return false
   },
+  async startsWithMetadata({}, {prefix, type}) {
+    return await db.startsWithMedatada(prefix, type)
+  }
 }
 
 export default new Vuex.Store({
