@@ -50,6 +50,7 @@ export default {
     }
   },
   created () {
+    this.content = this.content || ''
     this.from = this.item.from
     this.author = this.item.author
     const i = this.item.tags.indexOf('#####')
