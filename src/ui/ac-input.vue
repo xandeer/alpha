@@ -6,7 +6,7 @@ el-autocomplete(triggerOnFocus=false
   @input='handleChange'
   @select='select'
   @focus='onFocus'
-  @keyup.enter.native='handleEnterUp'
+  @keydown.enter.native='handleEnterDown'
   :hide-loading='true'
   :fetch-suggestions="filter")
 </template>
@@ -35,12 +35,15 @@ export default {
     },
     select(item) {
       this.$emit('input', item.value)
+      this.$nextTick(() => {
+        this.$emit('onselect')
+      })
     },
     focus() {
       this.$refs.el.focus()
     },
-    handleEnterUp(event) {
-      this.$emit('enterup', event)
+    handleEnterDown(event) {
+      this.$emit('enterdown', event)
       this.$refs.el.suggestions = null
       if (this.clearAfterEnter) {
         this.mValue = ''
